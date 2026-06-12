@@ -151,6 +151,39 @@ const runTests = async () => {
       throw new Error(`Dashboard report aggregation failed: ${JSON.stringify(reportRes.body)}`);
     }
 
+    // 7. Verify Lab Cases logs
+    console.log('\nTEST 7: Creating a lab case log...');
+    const expectedDelivery = new Date();
+    expectedDelivery.setDate(expectedDelivery.getDate() + 2);
+    
+    const labCaseRes = await request('/labcases', 'POST', {
+      patient: patientId,
+      labName: 'Apex Dental Labs',
+      workType: 'Aligner',
+      expectedDeliveryDate: expectedDelivery.toISOString(),
+      cost: 5000,
+      notes: 'Zirconia Aligner'
+    }, adminToken);
+
+    if (labCaseRes.status === 201 && labCaseRes.body.success) {
+      const labCaseId = labCaseRes.body.labcase._id;
+      console.log(`✅ Lab case logged: ID ${labCaseId}`);
+      
+      // Update status
+      console.log('TEST 8: Updating lab case status to Delivered...');
+      const updateRes = await request(`/labcases/${labCaseId}`, 'PUT', {
+        status: 'Delivered'
+      }, adminToken);
+      
+      if (updateRes.status === 200 && updateRes.body.success) {
+        console.log(`✅ Lab case status updated: ${updateRes.body.labcase.status}`);
+      } else {
+        throw new Error(`Failed to update lab case: ${JSON.stringify(updateRes.body)}`);
+      }
+    } else {
+      throw new Error(`Failed to create lab case: ${JSON.stringify(labCaseRes.body)}`);
+    }
+
     console.log('\n==================================================');
     console.log('   🎉 ALL SYSTEM API TESTS COMPLETED SUCCESSFULLY!  ');
     console.log('==================================================');

@@ -18,6 +18,7 @@ import Inventory from './pages/Inventory';
 import Staff from './pages/Staff';
 import Reports from './pages/Reports';
 import Unauthorized from './pages/Unauthorized';
+import LabCases from './pages/LabCases';
 
 function App() {
   const dispatch = useDispatch();
@@ -96,6 +97,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['Admin', 'Dental Assistant']}>
                 <Inventory />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/labcases" 
+            element={
+              <ProtectedRoute allowedRoles={['Admin', 'Dentist', 'Dental Assistant']}>
+                <LabCases />
               </ProtectedRoute>
             } 
           />

@@ -32,6 +32,7 @@ app.use('/api/prescriptions', require('./routes/prescriptionRoutes'));
 app.use('/api/billing', require('./routes/billingRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/labcases', require('./routes/labCaseRoutes'));
 
 // Serve static frontend assets in production (only when NOT running on Vercel)
 if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {

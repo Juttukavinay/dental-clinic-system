@@ -9,6 +9,7 @@ const Invoice = require('../models/Invoice');
 const Supplier = require('../models/Supplier');
 const Inventory = require('../models/Inventory');
 const Attendance = require('../models/Attendance');
+const LabCase = require('../models/LabCase');
 
 dotenv.config();
 
@@ -140,6 +141,7 @@ const seedDB = async () => {
     await Supplier.deleteMany();
     await Inventory.deleteMany();
     await Attendance.deleteMany();
+    await LabCase.deleteMany();
     console.log('Cleared existing collections.');
 
     // 1. Seed Staff Users (Hash passwords automatically via User Pre-Save Hook)
@@ -328,6 +330,23 @@ const seedDB = async () => {
     });
     await invoice2.save();
     console.log('Seeded Invoices.');
+
+    // 10. Seed Lab Cases
+    const labCaseDate = new Date();
+    labCaseDate.setDate(labCaseDate.getDate() + 1); // Expected tomorrow!
+
+    await LabCase.create({
+      patient: patients[1]._id, // Priyanka Sharma
+      dentist: dentist2._id, // Dr. Bob Malhotra
+      labName: 'Apex Dental Labs',
+      workType: 'Crown',
+      status: 'Sent',
+      dispatchDate: new Date(),
+      expectedDeliveryDate: labCaseDate,
+      cost: 2500,
+      notes: 'Crown for molar tooth 19. Shade A2, high translucent zirconia.',
+    });
+    console.log('Seeded Lab Cases.');
 
     console.log('--- DATABASE SEEDING COMPLETED SUCCESSFULY ---');
     process.exit(0);

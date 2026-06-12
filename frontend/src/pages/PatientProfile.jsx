@@ -13,7 +13,8 @@ import {
   AlertCircle,
   Clock,
   ChevronRight,
-  Upload
+  Upload,
+  Beaker
 } from 'lucide-react';
 
 const PatientProfile = () => {
@@ -24,8 +25,17 @@ const PatientProfile = () => {
   const [patient, setPatient] = useState(null);
   const [treatments, setTreatments] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
+  const [labCases, setLabCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('history');
+
+  // Lab case form state
+  const [showLabModal, setShowLabModal] = useState(false);
+  const [labName, setLabName] = useState('');
+  const [workType, setWorkType] = useState('Crown');
+  const [expectedDate, setExpectedDate] = useState('');
+  const [labCost, setLabCost] = useState('');
+  const [labNotes, setLabNotes] = useState('');
 
   // Treatment form state
   const [showTreatmentModal, setShowTreatmentModal] = useState(false);
@@ -60,6 +70,9 @@ const PatientProfile = () => {
 
       const rxData = await apiClient(`/prescriptions?patient=${id}`);
       setPrescriptions(rxData.prescriptions);
+
+      const labData = await apiClient(`/labcases?patient=${id}`);
+      setLabCases(labData.labcases || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -119,6 +132,42 @@ const PatientProfile = () => {
       fetchProfileData();
     } catch (err) {
       alert(err || 'Failed to issue prescription');
+    }
+  };
+
+  const handleAddLabCase = async (e) => {
+    e.preventDefault();
+    try {
+      await apiClient('/labcases', {
+        body: {
+          patient: id,
+          labName,
+          workType,
+          expectedDeliveryDate: expectedDate,
+          cost: Number(labCost),
+          notes: labNotes,
+        },
+      });
+      setShowLabModal(false);
+      setLabName('');
+      setExpectedDate('');
+      setLabCost('');
+      setLabNotes('');
+      fetchProfileData();
+    } catch (err) {
+      alert(err || 'Failed to dispatch to lab');
+    }
+  };
+
+  const updateLabStatus = async (labId, status) => {
+    try {
+      await apiClient(`/labcases/${labId}`, {
+        method: 'PUT',
+        body: { status },
+      });
+      fetchProfileData();
+    } catch (err) {
+      alert(err || 'Failed to update lab status');
     }
   };
 
@@ -220,7 +269,8 @@ const PatientProfile = () => {
           { id: 'history', label: 'Dental & Medical History', icon: FileText },
           { id: 'treatments', label: 'Treatments & Diagnosis', icon: Stethoscope },
           { id: 'prescriptions', label: 'Prescriptions Rx', icon: Pill },
-          { id: 'files', label: 'X-Rays & Lab Reports', icon: ImageIcon },
+          { id: 'files', label: 'X-Rays & Scans', icon: ImageIcon },
+          { id: 'labcases', label: 'Lab Cases', icon: Beaker },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -481,6 +531,116 @@ const PatientProfile = () => {
             </div>
           </div>
         )}
+
+        {/* Panel 5: Lab Cases */}
+        {activeTab === 'labcases' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider text-slate-500">
+                External Lab Cases
+              </h3>
+              {(user?.role === 'Admin' || user?.role === 'Dentist' || user?.role === 'Dental Assistant') && (
+                <button
+                  onClick={() => setShowLabModal(true)}
+                  className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700 cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Log Lab Dispatch</span>
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {labCases.length > 0 ? (
+                labCases.map((lc) => {
+                  const diffTime = new Date(lc.expectedDeliveryDate) - new Date();
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  const isUrgent = diffDays <= 3 && ['Sent', 'In-Progress'].includes(lc.status);
+
+                  return (
+                    <div 
+                      key={lc._id} 
+                      className={`glass-panel rounded-2xl p-5 border shadow-sm flex flex-col justify-between h-48 transition-all ${
+                        isUrgent ? 'border-rose-500/20 bg-rose-500/5' :
+                        lc.status === 'Fitted' ? 'border-emerald-500/20 bg-emerald-500/5' :
+                        'border-slate-100 dark:border-slate-850'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className="rounded-full bg-slate-150 dark:bg-slate-800 px-2.5 py-0.5 text-[10px] font-bold uppercase text-slate-650 dark:text-slate-300">
+                            {lc.workType}
+                          </span>
+                          {isUrgent ? (
+                            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                              Overdue in {diffDays} days!
+                            </span>
+                          ) : lc.status !== 'Delivered' && lc.status !== 'Fitted' ? (
+                            <span className="text-[10px] text-slate-405 font-semibold">
+                              Expected: {new Date(lc.expectedDeliveryDate).toLocaleDateString()}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-emerald-605 dark:text-emerald-400 font-semibold">
+                              Delivered
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-sm font-bold text-slate-805 dark:text-white mt-3.5">Lab: {lc.labName}</h4>
+                        <p className="text-xs text-slate-400">Dentist: Dr. {lc.dentist?.name || user?.name}</p>
+                        {user?.role === 'Admin' && (
+                          <p className="text-xs font-bold text-slate-650 dark:text-slate-350">Cost: ₹{lc.cost}</p>
+                        )}
+                        {lc.notes && <p className="text-xs text-slate-500 italic mt-2 truncate">Notes: {lc.notes}</p>}
+                      </div>
+
+                      <div className="border-t border-slate-100 dark:border-slate-800 pt-3 mt-4 flex justify-between items-center text-xs">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                          lc.status === 'Sent' ? 'bg-indigo-100 text-indigo-750' :
+                          lc.status === 'In-Progress' ? 'bg-amber-100 text-amber-750' :
+                          lc.status === 'Delivered' ? 'bg-teal-100 text-teal-750' :
+                          'bg-emerald-100 text-emerald-750'
+                        }`}>
+                          {lc.status}
+                        </span>
+
+                        <div className="flex gap-2.5 font-bold">
+                          {lc.status === 'Sent' && (
+                            <button 
+                              onClick={() => updateLabStatus(lc._id, 'In-Progress')}
+                              className="text-brand-500 hover:underline cursor-pointer"
+                            >
+                              Start
+                            </button>
+                          )}
+                          {(lc.status === 'Sent' || lc.status === 'In-Progress') && (
+                            <button 
+                              onClick={() => updateLabStatus(lc._id, 'Delivered')}
+                              className="text-teal-600 dark:text-teal-405 hover:underline cursor-pointer"
+                            >
+                              Mark Received
+                            </button>
+                          )}
+                          {lc.status === 'Delivered' && (
+                            <button 
+                              onClick={() => updateLabStatus(lc._id, 'Fitted')}
+                              className="text-emerald-600 dark:text-emerald-450 hover:underline cursor-pointer"
+                            >
+                              Mark Fitted
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="col-span-full py-12 text-center text-sm text-slate-400">
+                  No laboratory cases recorded for this patient.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal: Add Treatment */}
@@ -644,6 +804,97 @@ const PatientProfile = () => {
                   className="rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-700"
                 >
                   Issue Rx Prescription
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Log Lab Dispatch */}
+      {showLabModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <h3 className="text-base font-bold text-slate-800 dark:text-white mb-2">Log Lab Dispatch</h3>
+            <p className="text-xs text-slate-400 mb-4">Patient: <span className="font-bold">{patient.name}</span></p>
+
+            <form onSubmit={handleAddLabCase} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase">Lab Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Apex Dental Labs"
+                    value={labName}
+                    onChange={(e) => setLabName(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase">Work Type *</label>
+                  <select
+                    value={workType}
+                    onChange={(e) => setWorkType(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800"
+                  >
+                    <option value="Crown">Crown</option>
+                    <option value="Bridge">Bridge</option>
+                    <option value="Aligner">Aligner</option>
+                    <option value="Denture">Denture</option>
+                    <option value="Implant">Implant</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase">Expected Delivery *</label>
+                  <input
+                    type="date"
+                    required
+                    value={expectedDate}
+                    onChange={(e) => setExpectedDate(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase">Dispatch Cost (₹) *</label>
+                  <input
+                    type="number"
+                    required
+                    placeholder="e.g. 1500"
+                    value={labCost}
+                    onChange={(e) => setLabCost(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase">Fabrication Notes</label>
+                <textarea
+                  value={labNotes}
+                  onChange={(e) => setLabNotes(e.target.value)}
+                  placeholder="Shade A2, zirconia crown for molar tooth 19"
+                  className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:border-slate-700 dark:bg-slate-800 h-20"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowLabModal(false); setLabName(''); setExpectedDate(''); setLabCost(''); setLabNotes(''); }}
+                  className="rounded-lg bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-650 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-350"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-700"
+                >
+                  Log Dispatch
                 </button>
               </div>
             </form>

@@ -10,7 +10,8 @@ import {
   UserCheck, 
   BarChart3, 
   LogOut,
-  Activity
+  Activity,
+  Beaker
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -52,6 +53,12 @@ const Sidebar = () => {
       path: '/inventory',
       icon: Package,
       roles: ['Admin', 'Dental Assistant'],
+    },
+    {
+      name: 'Lab Cases',
+      path: '/labcases',
+      icon: Beaker,
+      roles: ['Admin', 'Dentist', 'Dental Assistant'],
     },
     {
       name: 'Staff & Attendance',
