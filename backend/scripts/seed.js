@@ -151,8 +151,8 @@ const seedDB = async () => {
     }
     console.log(`Seeded ${users.length} staff members.`);
 
-    const dentist1 = users.find((u) => u.name === 'Dr. Jane Miller');
-    const dentist2 = users.find((u) => u.name === 'Dr. Bob Vance');
+    const dentist1 = users.find((u) => u.name === 'Dr. Jane Patel');
+    const dentist2 = users.find((u) => u.name === 'Dr. Bob Malhotra');
     const receptionist = users.find((u) => u.role === 'Receptionist');
 
     // 2. Seed Patients
