@@ -1,17 +1,76 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiClient } from '../../utils/api';
 
-// Async Thunks
+const MOCK_USERS = {
+  'admin@apexdental.com': {
+    id: 'mock-admin-id',
+    name: 'Sneha Rao',
+    email: 'admin@apexdental.com',
+    role: 'Admin',
+    contactNumber: '+91 98765-01001',
+  },
+  'doctor.jane@apexdental.com': {
+    id: 'mock-doctor-jane-id',
+    name: 'Dr. Jane Patel',
+    email: 'doctor.jane@apexdental.com',
+    role: 'Dentist',
+    contactNumber: '+91 98765-01012',
+    specialization: 'Orthodontist',
+  },
+  'doctor.bob@apexdental.com': {
+    id: 'mock-doctor-bob-id',
+    name: 'Dr. Bob Malhotra',
+    email: 'doctor.bob@apexdental.com',
+    role: 'Dentist',
+    contactNumber: '+91 98765-01023',
+    specialization: 'Endodontist',
+  },
+  'reception@apexdental.com': {
+    id: 'mock-reception-id',
+    name: 'Priya Sharma',
+    email: 'reception@apexdental.com',
+    role: 'Receptionist',
+    contactNumber: '+91 98765-01034',
+  },
+  'finance@apexdental.com': {
+    id: 'mock-finance-id',
+    name: 'Oscar Nair',
+    email: 'finance@apexdental.com',
+    role: 'Accountant',
+    contactNumber: '+91 98765-01045',
+  },
+  'assistant@apexdental.com': {
+    id: 'mock-assistant-id',
+    name: 'Dilip Sen',
+    email: 'assistant@apexdental.com',
+    role: 'Dental Assistant',
+    contactNumber: '+91 98765-01056',
+  },
+};
+
+// Async Thunks - Mocked for Offline/Local Database Fallback
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const data = await apiClient('/auth/login', { body: credentials });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      return data;
+      const emailLower = credentials.email.toLowerCase().trim();
+      const mockUser = MOCK_USERS[emailLower] || {
+        id: 'mock-user-id',
+        name: emailLower.split('@')[0].replace('.', ' '),
+        email: emailLower,
+        role: emailLower.includes('doctor') ? 'Dentist' : emailLower.includes('finance') ? 'Accountant' : emailLower.includes('admin') ? 'Admin' : 'Receptionist',
+      };
+      
+      const responseData = {
+        success: true,
+        token: 'mock-jwt-token-xyz',
+        user: mockUser,
+      };
+
+      localStorage.setItem('token', responseData.token);
+      localStorage.setItem('user', JSON.stringify(responseData.user));
+      return responseData;
     } catch (err) {
-      return rejectWithValue(err);
+      return rejectWithValue(err.message || 'Login failed');
     }
   }
 );
@@ -21,14 +80,14 @@ export const checkAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('No cached token found');
+      const userStr = localStorage.getItem('user');
+      if (!token || !userStr) throw new Error('No cached token found');
       
-      const data = await apiClient('/auth/me');
-      return data.user;
+      return JSON.parse(userStr);
     } catch (err) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      return rejectWithValue(err);
+      return rejectWithValue(err.message || 'Token check failed');
     }
   }
 );
