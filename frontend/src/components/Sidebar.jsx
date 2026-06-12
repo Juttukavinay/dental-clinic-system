@@ -11,7 +11,8 @@ import {
   BarChart3, 
   LogOut,
   Activity,
-  Beaker
+  Beaker,
+  Sliders
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -71,6 +72,12 @@ const Sidebar = () => {
       path: '/reports',
       icon: BarChart3,
       roles: ['Admin', 'Dentist', 'Accountant', 'Receptionist', 'Manager'],
+    },
+    {
+      name: 'Manager Desk',
+      path: '/manager',
+      icon: Sliders,
+      roles: ['Admin', 'Manager'],
     },
   ];
 

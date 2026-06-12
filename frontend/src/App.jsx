@@ -19,6 +19,7 @@ import Staff from './pages/Staff';
 import Reports from './pages/Reports';
 import Unauthorized from './pages/Unauthorized';
 import LabCases from './pages/LabCases';
+import Manager from './pages/Manager';
 
 function App() {
   const dispatch = useDispatch();
@@ -55,6 +56,14 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/staff" element={<Staff />} />
+          <Route 
+            path="/manager" 
+            element={
+              <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
+                <Manager />
+              </ProtectedRoute>
+            } 
+          />
 
           {/* Role restricted routes */}
           <Route 
