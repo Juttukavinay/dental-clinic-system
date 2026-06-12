@@ -15,7 +15,7 @@ import {
   Sliders
 } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
@@ -84,16 +84,25 @@ const Sidebar = () => {
   const filteredItems = navigationItems.filter(item => item.roles.includes(user?.role));
 
   return (
-    <aside className="fixed left-0 top-0 z-20 flex h-screen w-64 flex-col border-r border-slate-200 bg-white/80 p-5 dark:border-slate-800 dark:bg-slate-900/80 backdrop-blur-xl">
+    <aside className={`fixed left-0 top-0 z-40 lg:z-20 flex h-screen w-64 flex-col border-r border-slate-200 bg-white/95 lg:bg-white/80 p-5 dark:border-slate-800 dark:bg-slate-900 lg:dark:bg-slate-900/80 backdrop-blur-xl transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
       {/* Brand Header */}
-      <div className="flex items-center gap-3 px-2 py-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white shadow-lg shadow-brand-500/20">
-          <Activity size={22} className="animate-pulse" />
+      <div className="flex items-center justify-between px-2 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white shadow-lg shadow-brand-500/20">
+            <Activity size={22} className="animate-pulse" />
+          </div>
+          <div>
+            <h1 className="font-sans font-bold text-slate-800 dark:text-white leading-tight">Apex Dental</h1>
+            <span className="text-xs text-brand-500 font-medium tracking-wide">CLINIC OS</span>
+          </div>
         </div>
-        <div>
-          <h1 className="font-sans font-bold text-slate-800 dark:text-white leading-tight">Apex Dental</h1>
-          <span className="text-xs text-brand-500 font-medium tracking-wide">CLINIC OS</span>
-        </div>
+        {/* Mobile close button */}
+        <button 
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 lg:hidden hover:bg-slate-100 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
+        >
+          &times;
+        </button>
       </div>
 
       {/* Nav List */}
@@ -104,6 +113,7 @@ const Sidebar = () => {
             <NavLink
               key={item.name}
               to={item.path}
+              onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
                   isActive
