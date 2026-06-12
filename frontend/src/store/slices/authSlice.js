@@ -45,6 +45,13 @@ const MOCK_USERS = {
     role: 'Dental Assistant',
     contactNumber: '+91 98765-01056',
   },
+  'manager@apexdental.com': {
+    id: 'mock-manager-id',
+    name: 'Karan Mehra',
+    email: 'manager@apexdental.com',
+    role: 'Manager',
+    contactNumber: '+91 98765-01099',
+  },
 };
 
 // Async Thunks - Mocked for Offline/Local Database Fallback
@@ -57,7 +64,10 @@ export const login = createAsyncThunk(
         id: 'mock-user-id',
         name: emailLower.split('@')[0].replace('.', ' '),
         email: emailLower,
-        role: emailLower.includes('doctor') ? 'Dentist' : emailLower.includes('finance') ? 'Accountant' : emailLower.includes('admin') ? 'Admin' : 'Receptionist',
+        role: emailLower.includes('doctor') ? 'Dentist' : 
+              emailLower.includes('finance') ? 'Accountant' : 
+              emailLower.includes('admin') ? 'Admin' : 
+              emailLower.includes('manager') ? 'Manager' : 'Receptionist',
       };
       
       const responseData = {

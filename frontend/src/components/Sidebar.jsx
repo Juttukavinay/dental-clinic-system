@@ -28,49 +28,49 @@ const Sidebar = () => {
       name: 'Dashboard',
       path: '/dashboard',
       icon: LayoutDashboard,
-      roles: ['Admin', 'Dentist', 'Receptionist', 'Dental Assistant', 'Accountant'],
+      roles: ['Admin', 'Dentist', 'Receptionist', 'Dental Assistant', 'Accountant', 'Manager'],
     },
     {
       name: 'Patients',
       path: '/patients',
       icon: Users,
-      roles: ['Admin', 'Dentist', 'Receptionist', 'Dental Assistant'],
+      roles: ['Admin', 'Dentist', 'Receptionist', 'Dental Assistant', 'Manager'],
     },
     {
       name: 'Appointments',
       path: '/appointments',
       icon: CalendarRange,
-      roles: ['Admin', 'Dentist', 'Receptionist'],
+      roles: ['Admin', 'Dentist', 'Receptionist', 'Manager'],
     },
     {
       name: 'Billing & Invoices',
       path: '/billing',
       icon: FileSpreadsheet,
-      roles: ['Admin', 'Accountant', 'Receptionist'],
+      roles: ['Admin', 'Accountant', 'Receptionist', 'Manager'],
     },
     {
       name: 'Inventory',
       path: '/inventory',
       icon: Package,
-      roles: ['Admin', 'Dental Assistant'],
+      roles: ['Admin', 'Dental Assistant', 'Manager'],
     },
     {
       name: 'Lab Cases',
       path: '/labcases',
       icon: Beaker,
-      roles: ['Admin', 'Dentist', 'Dental Assistant'],
+      roles: ['Admin', 'Dentist', 'Dental Assistant', 'Manager'],
     },
     {
       name: 'Staff & Attendance',
       path: '/staff',
       icon: UserCheck,
-      roles: ['Admin', 'Receptionist', 'Dentist', 'Accountant', 'Dental Assistant'], // staff check-in/leaves is open, admin approves
+      roles: ['Admin', 'Receptionist', 'Dentist', 'Accountant', 'Dental Assistant', 'Manager'], // staff check-in/leaves is open, admin approves
     },
     {
       name: 'Reports',
       path: '/reports',
       icon: BarChart3,
-      roles: ['Admin', 'Dentist', 'Accountant', 'Receptionist'],
+      roles: ['Admin', 'Dentist', 'Accountant', 'Receptionist', 'Manager'],
     },
   ];
 

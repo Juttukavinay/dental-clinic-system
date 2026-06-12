@@ -728,7 +728,7 @@ const Dashboard = () => {
         <p className="text-sm text-slate-500">Welcome to Apex Dental Care. Select pages from the sidebar to view clinic operations.</p>
       </div>
 
-      {user?.role === 'Admin' && renderAdminDashboard()}
+      {(user?.role === 'Admin' || user?.role === 'Manager') && renderAdminDashboard()}
       {user?.role === 'Dentist' && renderDentistDashboard()}
       {user?.role === 'Receptionist' && renderReceptionistDashboard()}
       {user?.role === 'Accountant' && renderAccountantDashboard()}

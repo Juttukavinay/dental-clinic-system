@@ -136,6 +136,18 @@ const Login = () => {
             >
               💵 Accountant
             </button>
+            <button
+              onClick={() => handleQuickLogin('manager@apexdental.com', 'manager123')}
+              className="rounded-lg border border-white/5 bg-white/5 py-2 text-white hover:bg-white/15"
+            >
+              💼 Manager
+            </button>
+            <button
+              onClick={() => handleQuickLogin('assistant@apexdental.com', 'assistant123')}
+              className="rounded-lg border border-white/5 bg-white/5 py-2 text-white hover:bg-white/15"
+            >
+              🛠️ Assistant
+            </button>
           </div>
         </div>
 
