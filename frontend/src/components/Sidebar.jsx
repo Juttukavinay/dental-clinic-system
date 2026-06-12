@@ -12,7 +12,8 @@ import {
   LogOut,
   Activity,
   Beaker,
-  Sliders
+  Sliders,
+  X
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -100,8 +101,9 @@ const Sidebar = ({ isOpen, onClose }) => {
         <button 
           onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 lg:hidden hover:bg-slate-100 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
+          aria-label="Close menu"
         >
-          &times;
+          <X size={18} />
         </button>
       </div>
 
